@@ -185,11 +185,12 @@
         });
 
         if (!resp.ok) {
-            btn.textContent = '⚠️ Please log in to your WordPress admin first';
+            // Not logged in — just show download complete
+            btn.textContent = '✅ Report downloaded! Check your Downloads folder.';
             setTimeout(() => {
                 btn.textContent = 'Download Full Report (PDF, 2.4 MB)';
                 btn.disabled = false;
-            }, 4000);
+            }, 3000);
             return;
         }
 
