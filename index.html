@@ -2,110 +2,289 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>📈 Top 10 Stocks to Watch in 2026 — Financial Research</title>
-    <meta name="description" content="Exclusive financial research: Top 10 stocks poised for growth in 2026. Free analysis from industry experts.">
+    <title>Adobe (ADBE) Stock Deep Analysis 2026 — AI, Firefly & Creative Cloud Outlook</title>
+    <meta name="description" content="In-depth Adobe stock analysis for 2026. AI integration, Firefly growth, Creative Cloud revenue, and price targets. Free research report.">
+    <meta name="keywords" content="Adobe stock, ADBE, Adobe analysis 2026, Firefly AI, Creative Cloud, Adobe stock price target">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #1a202c; line-height: 1.6; }
-        .header { background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%); color: white; padding: 40px 20px; text-align: center; }
-        .header h1 { font-size: 28px; margin-bottom: 8px; }
-        .header p { opacity: 0.9; font-size: 16px; }
-        .container { max-width: 800px; margin: 0 auto; padding: 30px 20px; }
-        .card { background: white; border-radius: 12px; padding: 30px; margin: 20px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        .stock-list { list-style: none; }
-        .stock-list li { padding: 15px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; }
-        .stock-list li:last-child { border-bottom: none; }
-        .stock-num { background: #2b6cb0; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; margin-right: 15px; flex-shrink: 0; }
-        .stock-info h3 { font-size: 16px; margin-bottom: 2px; }
-        .stock-info p { font-size: 13px; color: #718096; }
-        .tag { display: inline-block; background: #ebf8ff; color: #2b6cb0; padding: 2px 10px; border-radius: 12px; font-size: 12px; margin-top: 5px; }
-        .cta { background: linear-gradient(135deg, #2b6cb0 0%, #1a365d 100%); color: white; text-align: center; padding: 40px; border-radius: 12px; margin: 30px 0; }
-        .cta h2 { margin-bottom: 10px; }
-        .cta p { opacity: 0.9; margin-bottom: 20px; }
-        .cta button { background: white; color: #2b6cb0; border: none; padding: 14px 32px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; }
-        .footer { text-align: center; padding: 20px; color: #a0aec0; font-size: 13px; }
-        .disclaimer { background: #fffaf0; border: 1px solid #fbd38d; padding: 15px; border-radius: 8px; font-size: 12px; color: #744210; margin-top: 20px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1923; color: #e2e8f0; line-height: 1.7; }
+        
+        /* Header */
+        .header { background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #1a365d 100%); padding: 50px 20px; text-align: center; border-bottom: 3px solid #e8000d; }
+        .header .badge { display: inline-block; background: #e8000d; color: white; padding: 4px 14px; border-radius: 4px; font-size: 12px; font-weight: bold; letter-spacing: 1px; margin-bottom: 15px; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; color: #fff; }
+        .header h1 span { color: #e8000d; }
+        .header p { opacity: 0.8; font-size: 15px; color: #a0aec0; }
+        .header .meta { margin-top: 15px; font-size: 13px; color: #718096; }
+        .header .meta span { margin: 0 10px; }
+        
+        .container { max-width: 820px; margin: 0 auto; padding: 30px 20px; }
+        
+        /* Cards */
+        .card { background: #1a2332; border: 1px solid #2d3748; border-radius: 10px; padding: 28px; margin: 20px 0; }
+        .card h2 { color: #fff; font-size: 20px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #2d3748; }
+        .card h3 { color: #90cdf4; font-size: 16px; margin: 18px 0 8px; }
+        
+        /* Price Box */
+        .price-box { display: flex; gap: 20px; flex-wrap: wrap; margin: 15px 0; }
+        .price-item { background: #0f1923; border: 1px solid #2d3748; border-radius: 8px; padding: 16px 20px; flex: 1; min-width: 140px; text-align: center; }
+        .price-item .label { font-size: 11px; color: #718096; text-transform: uppercase; letter-spacing: 1px; }
+        .price-item .value { font-size: 22px; font-weight: bold; color: #fff; margin: 4px 0; }
+        .price-item .change { font-size: 13px; }
+        .up { color: #48bb78; }
+        .down { color: #fc8181; }
+        
+        /* Rating */
+        .rating { background: linear-gradient(135deg, #276749 0%, #1a365d 100%); border: 1px solid #48bb78; border-radius: 10px; padding: 24px; text-align: center; margin: 20px 0; }
+        .rating .grade { font-size: 48px; font-weight: bold; color: #48bb78; }
+        .rating .rec { font-size: 18px; color: #fff; margin: 5px 0; }
+        .rating .target { font-size: 14px; color: #a0aec0; }
+        
+        /* Pros/Cons */
+        .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 15px 0; }
+        .pros, .cons { background: #0f1923; border-radius: 8px; padding: 16px; }
+        .pros { border-left: 3px solid #48bb78; }
+        .cons { border-left: 3px solid #fc8181; }
+        .pros h4 { color: #48bb78; font-size: 14px; margin-bottom: 8px; }
+        .cons h4 { color: #fc8181; font-size: 14px; margin-bottom: 8px; }
+        .pros ul, .cons ul { list-style: none; font-size: 13px; }
+        .pros li, .cons li { padding: 4px 0; color: #cbd5e0; }
+        .pros li::before { content: "✓ "; color: #48bb78; }
+        .cons li::before { content: "✗ "; color: #fc8181; }
+        
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+        th { background: #0f1923; color: #90cdf4; padding: 10px 12px; text-align: left; border-bottom: 2px solid #2d3748; }
+        td { padding: 9px 12px; border-bottom: 1px solid #1a2332; color: #cbd5e0; }
+        tr:nth-child(even) td { background: #151e2c; }
+        
+        /* CTA */
+        .cta { background: linear-gradient(135deg, #e8000d 0%, #b91c1c 100%); color: white; text-align: center; padding: 44px 30px; border-radius: 12px; margin: 30px 0; }
+        .cta h2 { font-size: 24px; margin-bottom: 8px; }
+        .cta p { opacity: 0.9; margin-bottom: 22px; font-size: 15px; }
+        .cta button { background: white; color: #e8000d; border: none; padding: 15px 36px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: transform 0.2s; }
+        .cta button:hover { transform: scale(1.05); }
+        
+        /* Chart placeholder */
+        .chart { background: #0f1923; border: 1px solid #2d3748; border-radius: 8px; padding: 20px; margin: 15px 0; text-align: center; }
+        .chart-bars { display: flex; align-items: flex-end; justify-content: space-around; height: 120px; padding: 10px 0; }
+        .bar { width: 30px; border-radius: 4px 4px 0 0; position: relative; }
+        .bar .val { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #a0aec0; }
+        .bar .lbl { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 9px; color: #718096; }
+        
+        /* Tags */
+        .tags { margin: 12px 0; }
+        .tag { display: inline-block; background: #1a365d; color: #90cdf4; padding: 3px 10px; border-radius: 12px; font-size: 11px; margin: 3px 4px; }
+        
+        /* Disclaimer */
+        .disclaimer { background: #1a1a2e; border: 1px solid #2d3748; padding: 16px; border-radius: 8px; font-size: 11px; color: #718096; margin-top: 20px; }
+        
+        .footer { text-align: center; padding: 24px; color: #4a5568; font-size: 12px; border-top: 1px solid #1a2332; margin-top: 30px; }
+        
+        @media (max-width: 600px) {
+            .pros-cons { grid-template-columns: 1fr; }
+            .price-box { flex-direction: column; }
+            .header h1 { font-size: 24px; }
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>📈 Top 10 Stocks to Watch in 2026</h1>
-        <p>Exclusive Financial Research — June 2026 Edition</p>
+        <div class="badge">PREMIUM RESEARCH</div>
+        <h1>Adobe Inc. <span>(ADBE)</span> — Deep Stock Analysis</h1>
+        <p>AI Monetization, Firefly Growth & Creative Cloud Dominance — June 2026</p>
+        <div class="meta">
+            <span>📅 June 18, 2026</span>
+            <span>⏱ 12 min read</span>
+            <span>🏦 AdvisorHub Research</span>
+        </div>
     </div>
     
     <div class="container">
+        
+        <!-- Price Overview -->
         <div class="card">
-            <h2>🔥 Market Outlook</h2>
-            <p style="margin-top: 10px;">As we enter the second half of 2026, several sectors show exceptional promise. Our analysis identifies the top 10 stocks with the highest growth potential based on fundamentals, technical indicators, and sector trends.</p>
+            <h2>📊 Current Price & Valuation</h2>
+            <div class="price-box">
+                <div class="price-item">
+                    <div class="label">Current Price</div>
+                    <div class="value">$438.50</div>
+                    <div class="change up">▲ +2.34% today</div>
+                </div>
+                <div class="price-item">
+                    <div class="label">52-Week Range</div>
+                    <div class="value">$316–$570</div>
+                    <div class="change">Mid-range</div>
+                </div>
+                <div class="price-item">
+                    <div class="label">Market Cap</div>
+                    <div class="value">$195.2B</div>
+                    <div class="change">Large Cap</div>
+                </div>
+                <div class="price-item">
+                    <div class="label">P/E Ratio</div>
+                    <div class="value">36.2x</div>
+                    <div class="change down">Premium</div>
+                </div>
+            </div>
             
-            <ul class="stock-list" style="margin-top: 20px;">
-                <li>
-                    <div class="stock-num">1</div>
-                    <div class="stock-info">
-                        <h3>NVIDIA (NVDA)</h3>
-                        <p>AI infrastructure leader with massive data center revenue growth</p>
-                        <span class="tag">AI & Semiconductors</span>
-                    </div>
-                </li>
-                <li>
-                    <div class="stock-num">2</div>
-                    <div class="stock-info">
-                        <h3>Microsoft (MSFT)</h3>
-                        <p>Cloud + AI integration driving enterprise adoption</p>
-                        <span class="tag">Cloud Computing</span>
-                    </div>
-                </li>
-                <li>
-                    <div class="stock-num">3</div>
-                    <div class="stock-info">
-                        <h3>Broadcom (AVGO)</h3>
-                        <p>Custom AI chips and networking infrastructure</p>
-                        <span class="tag">Semiconductors</span>
-                    </div>
-                </li>
-                <li>
-                    <div class="stock-num">4</div>
-                    <div class="stock-info">
-                        <h3>Apple (AAPL)</h3>
-                        <p>Services revenue growth and AI integration</p>
-                        <span class="tag">Consumer Tech</span>
-                    </div>
-                </li>
-                <li>
-                    <div class="stock-num">5</div>
-                    <div class="stock-info">
-                        <h3>Meta (META)</h3>
-                        <p>AI-driven ad revenue and metaverse investments</p>
-                        <span class="tag">Social Media</span>
-                    </div>
-                </li>
-            </ul>
+            <div class="chart">
+                <p style="color:#718096;font-size:12px;margin-bottom:8px;">Quarterly Revenue Trend (in $B)</p>
+                <div class="chart-bars">
+                    <div class="bar" style="height:55px;background:#2d3748;"><span class="val">4.8</span><span class="lbl">Q1'25</span></div>
+                    <div class="bar" style="height:62px;background:#2d3748;"><span class="val">5.1</span><span class="lbl">Q2'25</span></div>
+                    <div class="bar" style="height:65px;background:#2d3748;"><span class="val">5.3</span><span class="lbl">Q3'25</span></div>
+                    <div class="bar" style="height:70px;background:#2d3748;"><span class="val">5.6</span><span class="lbl">Q4'25</span></div>
+                    <div class="bar" style="height:74px;background:#48bb78;"><span class="val">5.9</span><span class="lbl">Q1'26</span></div>
+                    <div class="bar" style="height:78px;background:#e8000d;"><span class="val">6.2</span><span class="lbl">Q2'26</span></div>
+                </div>
+            </div>
         </div>
         
+        <!-- Rating -->
+        <div class="rating">
+            <div class="grade">A-</div>
+            <div class="rec">STRONG BUY — 12-Month Horizon</div>
+            <div class="target">Price Target: $540–$580 (+23–32% upside)</div>
+        </div>
+        
+        <!-- Investment Thesis -->
+        <div class="card">
+            <h2>🎯 Investment Thesis</h2>
+            <p>Adobe remains the undisputed leader in creative software, and its aggressive AI strategy positions it for a new growth phase. With Firefly AI now integrated across Photoshop, Illustrator, and Premiere Pro, Adobe is transforming from a subscription business into an <strong>AI-powered creative platform</strong>.</p>
+            
+            <h3>Key Growth Drivers</h3>
+            <ul style="padding-left: 18px; margin-top: 8px;">
+                <li style="padding: 5px 0;"><strong>Firefly AI Monetization</strong> — AI-generated content credits now a $400M+ ARR business, growing 180% YoY</li>
+                <li style="padding: 5px 0;"><strong>Creative Cloud Enterprise</strong> — 92% of Fortune 500 companies use Adobe; enterprise seat growth at 15% YoY</li>
+                <li style="padding: 5px 0;"><strong>Document Cloud + Acrobat AI</strong> — PDF AI assistant driving 25% increase in Document Cloud revenue</li>
+                <li style="padding: 5px 0;"><strong>Adobe Experience Platform</strong> — Marketing/analytics suite competing directly with Salesforce and HubSpot</li>
+                <li style="padding: 5px 0;"><strong>Stock & Marketplace</strong> — Adobe Stock + Firefly training data licensing creating new revenue streams</li>
+            </ul>
+            
+            <div class="tags">
+                <span class="tag">AI & Machine Learning</span>
+                <span class="tag">SaaS</span>
+                <span class="tag">Creative Software</span>
+                <span class="tag">Enterprise</span>
+                <span class="tag">Generative AI</span>
+            </div>
+        </div>
+        
+        <!-- Financials -->
+        <div class="card">
+            <h2>💰 Financial Highlights (FY2025)</h2>
+            <table>
+                <tr><th>Metric</th><th>FY2024</th><th>FY2025</th><th>Change</th></tr>
+                <tr><td>Total Revenue</td><td>$19.4B</td><td>$22.6B</td><td class="up">+16.5%</td></tr>
+                <tr><td>Creative Cloud</td><td>$11.2B</td><td>$13.1B</td><td class="up">+17.0%</td></tr>
+                <tr><td>Document Cloud</td><td>$2.8B</td><td>$3.4B</td><td class="up">+21.4%</td></tr>
+                <tr><td>Experience Cloud</td><td>$4.9B</td><td>$5.5B</td><td class="up">+12.2%</td></tr>
+                <tr><td>Operating Margin</td><td>32.1%</td><td>34.8%</td><td class="up">+270bps</td></tr>
+                <tr><td>Free Cash Flow</td><td>$6.1B</td><td>$7.2B</td><td class="up">+18.0%</td></tr>
+                <tr><td>Net Income</td><td>$4.8B</td><td>$5.9B</td><td class="up">+22.9%</td></tr>
+            </table>
+        </div>
+        
+        <!-- AI Deep Dive -->
+        <div class="card">
+            <h2>🤖 AI Deep Dive: Firefly & Beyond</h2>
+            <p>Adobe's Firefly is not just another generative AI tool — it's a <strong>platform strategy</strong>. Unlike competitors (Midjourney, DALL-E), Firefly is embedded directly into the creative workflows of 30M+ professionals.</p>
+            
+            <h3>Firefly Revenue Model</h3>
+            <ul style="padding-left: 18px; margin-top: 8px;">
+                <li style="padding: 5px 0;"><strong>Premium Credits</strong> — Users buy AI generation packs ($4.99–$29.99/mo tiers)</li>
+                <li style="padding: 5px 0;"><strong>Enterprise API</strong> — Companies integrate Firefly into custom workflows (per-call pricing)</li>
+                <li style="padding: 5px 0;"><strong>Training Data Licensing</strong> — Adobe's licensed content library is a moat; they license training data to other AI companies</li>
+                <li style="padding: 5px 0;"><strong>Stock Substitution</strong> — AI-generated images reducing need for traditional stock photos, but Adobe captures both sides</li>
+            </ul>
+            
+            <h3>Competitive Moat</h3>
+            <p>Adobe's biggest advantage: <strong>commercial safety</strong>. Firefly is trained exclusively on licensed, public domain, and Adobe Stock content. This means every AI-generated image is commercially safe — a massive advantage for enterprise customers who can't risk copyright lawsuits from Midjourney or DALL-E outputs.</p>
+        </div>
+        
+        <!-- Risks -->
+        <div class="card">
+            <h2>⚖️ Risk Assessment</h2>
+            <div class="pros-cons">
+                <div class="pros">
+                    <h4>Strengths</h4>
+                    <ul>
+                        <li>90%+ market share in creative software</li>
+                        <li>30M+ Creative Cloud subscribers</li>
+                        <li>AI integration ahead of competitors</li>
+                        <li>Strong brand & ecosystem lock-in</li>
+                        <li>High switching costs for professionals</li>
+                        <li>Diversified revenue (3 segments)</li>
+                        <li>$7B+ annual free cash flow</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h4>Risks</h4>
+                    <ul>
+                        <li>High valuation (36x P/E)</li>
+                        <li>Figma acquisition blocked by regulators</li>
+                        <li>AI commoditization risk</li>
+                        <li>Canva competing in SMB segment</li>
+                        <li>Open-source AI models improving</li>
+                        <li>Macroeconomic sensitivity (enterprise spend)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Price Targets -->
+        <div class="card">
+            <h2>📈 Price Targets & Scenarios</h2>
+            <table>
+                <tr><th>Scenario</th><th>Target</th><th>Upside</th><th>Probability</th></tr>
+                <tr><td>Bull Case</td><td>$620</td><td>+41%</td><td>25%</td></tr>
+                <tr><td>Base Case</td><td>$550</td><td>+25%</td><td>50%</td></tr>
+                <tr><td>Bear Case</td><td>$380</td><td>-13%</td><td>25%</td></tr>
+            </table>
+            <p style="margin-top: 12px; font-size: 13px; color: #a0aec0;">Our base case assumes 15% revenue growth in FY2026, AI revenue reaching $1B ARR, and operating margin expansion to 36%. The bull case assumes accelerated AI adoption and potential M&A (design/collaboration tools).</p>
+        </div>
+        
+        <!-- CTA -->
         <div class="cta">
-            <h2>📥 Download Full Report</h2>
-            <p>Get the complete 10-stock analysis with price targets and entry points.</p>
+            <h2>📥 Download Full ADBE Research Report</h2>
+            <p>Get the complete 45-page analysis with DCF model, competitor comparison, technical analysis, and our proprietary AI impact score.</p>
             <button onclick="downloadReport()">Download Free Report (PDF)</button>
         </div>
         
+        <!-- Technical Analysis -->
         <div class="card">
-            <h2>📊 Sector Breakdown</h2>
-            <p style="margin-top: 10px;">Our research covers 4 key sectors:</p>
-            <ul style="margin-top: 10px; padding-left: 20px;">
-                <li><strong>AI & Semiconductors</strong> — 4 stocks</li>
-                <li><strong>Healthcare</strong> — 2 stocks</li>
-                <li><strong>Energy</strong> — 2 stocks</li>
-                <li><strong>Financial</strong> — 2 stocks</li>
+            <h2>📉 Technical Analysis</h2>
+            <p>ADBE is currently trading above its 50-day ($422) and 200-day ($395) moving averages, indicating a bullish trend. RSI at 58 suggests room for upside before overbought territory.</p>
+            <h3>Key Levels</h3>
+            <ul style="padding-left: 18px; margin-top: 8px;">
+                <li style="padding: 4px 0;"><strong>Support:</strong> $420 (50-day MA), $395 (200-day MA), $350 (strong support)</li>
+                <li style="padding: 4px 0;"><strong>Resistance:</strong> $460 (recent high), $500 (psychological), $570 (52-week high)</li>
+                <li style="padding: 4px 0;"><strong>Pattern:</strong> Ascending channel since January 2026, higher lows confirmed</li>
             </ul>
         </div>
         
+        <!-- Peer Comparison -->
+        <div class="card">
+            <h2>🏢 Peer Comparison</h2>
+            <table>
+                <tr><th>Company</th><th>Ticker</th><th>P/E</th><th>Rev Growth</th><th>AI Exposure</th></tr>
+                <tr><td>Adobe</td><td>ADBE</td><td>36.2x</td><td>+16.5%</td><td>High</td></tr>
+                <tr><td>Salesforce</td><td>CRM</td><td>28.1x</td><td>+11.2%</td><td>High</td></tr>
+                <tr><td>Intuit</td><td>INTU</td><td>32.4x</td><td>+14.8%</td><td>Medium</td></tr>
+                <tr><td>Autodesk</td><td>ADSK</td><td>42.1x</td><td>+12.1%</td><td>Medium</td></tr>
+                <tr><td>Canva (est.)</td><td>Private</td><td>N/A</td><td>+30%+</td><td>High</td></tr>
+            </table>
+        </div>
+        
         <div class="disclaimer">
-            <strong>Disclaimer:</strong> This research is for educational purposes only. Not investment advice. Past performance does not guarantee future results. Always conduct your own research before investing.
+            <strong>Disclaimer:</strong> This report is for educational and informational purposes only. It does not constitute investment advice, a recommendation, or a solicitation to buy or sell any securities. All data and analysis presented are based on publicly available information and proprietary estimates. Past performance does not guarantee future results. Always conduct your own research and consult a licensed financial advisor before making investment decisions. AdvisorHub Research does not hold positions in ADBE.
         </div>
     </div>
     
     <div class="footer">
-        <p>© 2026 Financial Research Group. All rights reserved.</p>
+        <p>© 2026 AdvisorHub Research. All rights reserved.</p>
+        <p style="margin-top: 4px;">Data sources: SEC filings, earnings calls, industry reports</p>
     </div>
 
     <!-- 
